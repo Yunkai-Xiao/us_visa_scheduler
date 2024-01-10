@@ -17,6 +17,8 @@ from sendgrid.helpers.mail import Mail
 
 from embassy import *
 
+import pygame
+
 config = configparser.ConfigParser()
 config.read('config.ini')
 
@@ -155,6 +157,7 @@ def start_process():
     print("\n\tlogin successful!\n")
 
 def reschedule(date):
+    return
     time = get_time(date)
     driver.get(APPOINTMENT_URL)
     headers = {
@@ -205,6 +208,19 @@ def is_logged_in():
         return False
     return True
 
+def play_ring_sound(sound_file='ring-sound.wav'):
+    # Initialize pygame mixer
+    pygame.mixer.init()
+
+    # Load the sound file
+    ring_sound = pygame.mixer.Sound(sound_file)
+
+    # Play the sound
+    ring_sound.play()
+
+    # Keep the script running until the sound is playing
+    while pygame.mixer.get_busy():
+        pygame.time.Clock().tick(10)
 
 def get_available_date(dates):
     # Evaluation of different available dates
@@ -219,6 +235,7 @@ def get_available_date(dates):
     for d in dates:
         date = d.get('date')
         if is_in_period(date, PSD, PED):
+            play_ring_sound()
             return date
     print(f"\n\nNo available dates between ({PSD.date()}) and ({PED.date()})!")
 
@@ -236,6 +253,9 @@ else:
 
 
 if __name__ == "__main__":
+    play_ring_sound()
+    print("Ring Sound checked.")
+    
     first_loop = True
     while 1:
         LOG_FILE_NAME = "log_" + str(datetime.now().date()) + ".txt"
